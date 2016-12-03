@@ -5,7 +5,7 @@ var firmata = require("firmata"); // make pins on Arduin oaccesible via serial-U
 var sendValueViaSocket = function() {}; // function to send message over socket
 var sendStaticMsgViaSocket = function() {}; // function to send static message over socket
 	 function handler(req, res) { // function with request and response, that is used in the first line of this example
-     fs.readFile(__dirname + "/Examp22_1.html",
+     fs.readFile(__dirname + "/Examp23.html",
       function (err, data){
           if (err) {
               res.writeHead(500, {"Content-Type": "text/plain"});
@@ -35,7 +35,8 @@ var KiIedt = 0; // multiplication of Ki x integral of error
 var KdDe_dt = 0; // multiplication of Kd x differential of error i.e.e Derror/dt
 var parametersStore ={}; // variable for json structure of parameters
 var errSumAbs = 0; // sum of absolute errors as performance measure
-
+var errAbs = 0; // absolute error
+var errLast = 0;
 
 var controlAlgorithmStartedFlag = 0; // flag in global scope to see weather ctrlAlg has been started
 var intervalCtrl; // var for setInterval in global space
@@ -99,7 +100,9 @@ var board = new firmata.Board("/dev/ttyACM0", function(){ // ACM Abstract Contro
 	  function controlAlgorithm (parameters) {
 	      if (parameters.ctrlAlgNo == 1) {
 	          pwm = parameters.pCoeff*(desiredValue-actualValue);
-                errSumAbs += Math.abs(desiredValue-actualValue);
+               // errSumAbs += Math.abs(desiredValue-actualValue);
+                errAbs = Math.abs(desiredValue-actualValue);
+		        errSumAbs += errAbs;
 	          if(pwm > pwmLimit) {pwm = pwmLimit}; // to limit the value for pwm / positive
 	          if(pwm < -pwmLimit) {pwm = -pwmLimit}; // to limit the value for pwm / negative
 	          if (pwm > 0) {board.digitalWrite(2,1); board.digitalWrite(4,0);}; // določimo smer če je > 0
@@ -109,7 +112,9 @@ var board = new firmata.Board("/dev/ttyACM0", function(){ // ACM Abstract Contro
 			if (parameters.ctrlAlgNo == 3) {
 		    err = desiredValue - actualValue; // error as difference between desired and actual val.
 			errSum += err; // sum of errors | like integral
-			errSumAbs += Math.abs(err);
+			//errSumAbs += Math.abs(err);
+			errAbs = Math.abs(err);
+	        errSumAbs += errAbs;
 			dErr = err - lastErr; // difference of error
 			pwm = parameters.Kp2*err+parameters.Ki2*errSum+parameters.Kd2*dErr; // PID expression
 			console.log(parameters.Kp2 + "|" + parameters.Ki2 + "|" + parameters.Kd2);
@@ -125,7 +130,9 @@ var board = new firmata.Board("/dev/ttyACM0", function(){ // ACM Abstract Contro
 	      if (parameters.ctrlAlgNo == 2) {
 	          err = desiredValue - actualValue; // error
 	          errSum += err; // sum of errors, like integral
-         errSumAbs += Math.abs(err);         
+         //errSumAbs += Math.abs(err);         
+         errAbs = Math.abs(err);
+         errSumAbs += errAbs;
          dErr = err - lastErr; // difference of error
          // for sending to client we put the parts to global scope
          KpE=parameters.Kp1*err;
@@ -137,7 +144,36 @@ var board = new firmata.Board("/dev/ttyACM0", function(){ // ACM Abstract Contro
           if(pwm < -pwmLimit) {pwm = -pwmLimit}; // to limit the value for pwm / negative
 	          if (pwm > 0) {board.digitalWrite(2,1); board.digitalWrite(4,0);}; // določimo smer če je > 0
 	          if (pwm < 0) {board.digitalWrite(2,0); board.digitalWrite(4,1);}; // določimo smer če je < 0
-	          board.analogWrite(3, Math.abs(pwm));        
+	          board.analogWrite(3, Math.abs(pwm));      
+	          
+			}
+			if (parameters.ctrlAlgNo == 4) {
+				errLast = err;
+				err = desiredValue - actualValue; // error
+				errSum += err; // sum of errors, like integral
+				errAbs = Math.abs(err);
+				errSumAbs += errAbs;
+				dErr = err - lastErr; // difference of error
+				// for sending to client we put the parts to global scope
+				KpE=parameters.Kp3*err;
+				KiIedt=parameters.Ki3*errSum;
+				KdDe_dt=parameters.Kd3*dErr;
+				console.log(parameters.Ki3 + " " + 254/parameters.Ki3 + " " + errSum)
+				if(errSum > 254/parameters.Ki3)
+					errSum = 254/parameters.Ki3;
+				if(errSum < -254/parameters.Ki3)
+					errSum = -254/parameters.Ki3;
+				if(err*errLast < 0)
+					errSum = 0;
+					pwm = KpE + KiIedt + KdDe_dt; // above parts are used
+					lastErr = err; // save the value for the next cycle
+				if(pwm > pwmLimit) {pwm = pwmLimit}; // to limit the value for pwm / positive
+				if(pwm < -pwmLimit) {pwm = -pwmLimit}; // to limit the value for pwm / negative
+				if (pwm > 0) {board.digitalWrite(2,1); board.digitalWrite(4,0);}; // določimo smer če je > 0
+				if (pwm < 0) {board.digitalWrite(2,0); board.digitalWrite(4,1);}; // določimo smer če je < 0
+				board.analogWrite(3, Math.abs(pwm));    
+				console.log("algorithm 4 444");
+	          
 	      }
 	  };
 	 
@@ -153,7 +189,9 @@ var board = new firmata.Board("/dev/ttyACM0", function(){ // ACM Abstract Contro
      "KpE": KpE,
      "KiIedt": KiIedt,
      "KdDe_dt": KdDe_dt,	     
-     "errSumAbs": errSumAbs
+     //"errSumAbs": errSumAbs
+     "errSumAbs": errSumAbs,
+	"errAbs": errAbs
      });
  
      
@@ -183,6 +221,7 @@ function stopControlAlgorithm ()
     KiIedt = 0;
     KdDe_dt = 0;
     errSumAbs = 0;
+    errLast = 0;
     console.log("ctrlAlg STOPPED");
 	parametersStore = {}; // empty temporary json object to report at controAlg stop
 };
