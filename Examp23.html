@@ -98,7 +98,11 @@ Kd: <input id="Kd3" value="0.23" size = "5" />
  var x6 = new Array(); // array for x6 variable
  var y6 = new Array(); // array for y6 variable
  var canvas6;
+ var canvas7;
+ var canvas8;
  var ctx6;
+  var ctx7;
+   var ctx8;
  // variable for Kp*P part
  var x7 = new Array(); // array for x7 variable
  var y7 = new Array(); // array for y7 variable
@@ -218,7 +222,8 @@ var y11 = new Array(); // array for y11 variable
 	  var numberOfLinesInLog = 15; // variable for the number of lines in log div
 	  var counterOfLogs = 0; // variable for counting the logs
 	 
-	  function log(msg) { // function to print messages to div with implemented scroll
+	  function log(msg) 
+	  { // function to print messages to div with implemented scroll
 	      var node=document.createElement("tr"); // we create variable node as tr (table row)
 	      var textnode=document.createTextNode(counterOfLogs + " | " + msg); // create elem. with text
       node.appendChild(textnode); // add to "node", i.e. table row
@@ -232,7 +237,7 @@ var y11 = new Array(); // array for y11 variable
 	  socket.on("clientReadValues", function(value){
 	      potValue1 = value.desiredValue;
 	      potValue2 = value.actualValue;
-	      pwm = parseInt((value.pwm).toFixed(0), 10);
+	      var pwm = parseInt((value.pwm).toFixed(0), 10);
 	 
      // Draw first graph *****************************************
       ctx1.clearRect(0, 0, canvas1.width, canvas1.height); // clear canvas only ONCE!
@@ -628,9 +633,9 @@ ctx3.lineWidth = "1";
 }
 function startControlAlgorithm3() {
      stopControlAlgorithm(); // just in case, if it is not started
-     Kp2 = document.getElementById("Kp2").value; // read the value of coeff from input field
-     Ki2 = document.getElementById("Ki2").value; // read the value of coeff from input field
-     Kd2 = document.getElementById("Kd2").value; // read the value of coeff from input field
+var     Kp2 = document.getElementById("Kp2").value; // read the value of coeff from input field
+var     Ki2 = document.getElementById("Ki2").value; // read the value of coeff from input field
+var     Kd2 = document.getElementById("Kd2").value; // read the value of coeff from input field
      socket.emit("startControlAlgorithm", {"ctrlAlgNo": 3, "Kp2": Kp2, "Ki2": Ki2, "Kd2": Kd2}); // send value of coeff
 
 }
@@ -638,39 +643,41 @@ function startControlAlgorithm3() {
 
 function startControlAlgorithm4() {
  stopControlAlgorithm(); // just in case, if it is not started
- Kp3 = document.getElementById("Kp3").value; // read the value of coeff from input field
- Ki3 = document.getElementById("Ki3").value; // read the value of coeff from input field
- Kd3 = document.getElementById("Kd3").value; // read the value of coeff from input field
+var Kp3 = document.getElementById("Kp3").value; // read the value of coeff from input field
+var Ki3 = document.getElementById("Ki3").value; // read the value of coeff from input field
+var Kd3 = document.getElementById("Kd3").value; // read the value of coeff from input field
  socket.emit("startControlAlgorithm", {"ctrlAlgNo": 4, "Kp3": Kp3, "Ki3": Ki3, "Kd3": Kd3}); // send value of coeff
   }
 	  
-function sendPosition () {
-positionValue = document.getElementById("position").value;
-stopControlAlgorithm(); // stop just in case
-switchAlgorihtm();
-socket.emit("sendPosition", positionValue);
+function sendPosition () 
+{
+ var positionValue = document.getElementById("position").value;
+ stopControlAlgorithm(); // stop just in case
+ switchAlgorihtm();
+ socket.emit("sendPosition", positionValue);
 }
-function pulse() {
-var positionInterval = 224;
-socket.emit("sendPosition", desiredPositionByInterval); // at start we send position
-
-intervalPulseFunction = setInterval(function() {
-if (positionInterval == 100) {
- positionInterval = 890;
-}
-else {
-positionInterval = 100;
-}
-socket.emit("sendPosition", positionInterval);
-}, 2500);
-
- 
- 
+function pulse() 
+{
+ var positionInterval = 224;
+ var desiredPositionByInterval;
+  socket.emit("sendPosition", desiredPositionByInterval); // at start we send position
+  intervalPulseFunction = setInterval(function() {
+  if (positionInterval == 100) 
+  {
+    positionInterval = 890;
+  }
+  else 
+  {
+  positionInterval = 100;
+  }
+  socket.emit("sendPosition", positionInterval);
+  }, 2500);
 }
 
 var functionValue = 0;
 
-function testFunction() {
+function testFunction() 
+{
  var initialValue = 256;
  switch (timeCounter >= 0) {
   case (timeCounter <= 1000):
@@ -685,42 +692,49 @@ function testFunction() {
  case (timeCounter > 2000 && timeCounter <= 3000):
    functionValue = 756 - 500 + 500 * Math.exp(-0.005 * (timeCounter - 2000));  // 756 - previous val; (756-220) - limit val
   }
-socket.emit("sendPosition", functionValue); // at start we send position
-timeCounter++;
-console.log(functionValue + "|" + timeCounter);
+ socket.emit("sendPosition", functionValue); // at start we send position
+ timeCounter++;
+ console.log(functionValue + "|" + timeCounter);
 }
  
-function startTestFunction () {
+function startTestFunction () 
+{
  stopControlAlgorithm ();
  switchAlgorihtm();
  timeCounter = 0;
  intervalTestFunction = setInterval(function() {testFunction(), 10});
- pulseDuration = document.getElementById("pulseDuration").value;
+ var pulseDuration = document.getElementById("pulseDuration").value;
 	setTimeout(function() {performanceMeasure = y10[1999]; stop();}, pulseDuration * 1000); // 30000
 }
-function stopTestFunction () {
+
+function stopTestFunction () 
+{
   clearInterval(intervalTestFunction);
 }
 
-function stop () {
+function stop () 
+{
 document.getElementById("divForStaticPrint").innerHTML = document.getElementById("divForStaticPrint").innerHTML + " | C = " + performanceMeasure;
 clearInterval(intervalPulseFunction);
 clearInterval(intervalTestFunction);
 stopControlAlgorithm();
 }
 
-function pulseTimed () {
+function pulseTimed () 
+{
 // first stop ctrlAlg, just in case
 stopControlAlgorithm ();
 switchAlgorihtm();
 pulse(); // starting pulse function
-pulseDuration = document.getElementById("pulseDuration").value;
+var pulseDuration = document.getElementById("pulseDuration").value;
 setTimeout(function() {performanceMeasure = y10[1999]; stop();}, pulseDuration * 1000); // 30000
 }
 
-function switchAlgorihtm () {
-whichAlgorithm = document.getElementById("whichAlgorithm").value;
-switch (whichAlgorithm) {
+function switchAlgorihtm () 
+{
+var whichAlgorithm = document.getElementById("whichAlgorithm").value;
+switch (whichAlgorithm) 
+ {
  case "1":
   startControlAlgorithm1();
   break;
@@ -732,12 +746,14 @@ switch (whichAlgorithm) {
   break;        
  case "4":
   startControlAlgorithm4();
+ }
  
-}}
+}
 	 
-	  function stopControlAlgorithm () {
-	      socket.emit("stopControlAlgorithm");
-	  }
+function stopControlAlgorithm () 
+{
+ socket.emit("stopControlAlgorithm");
+}
 	 
 	  </script>
 	  </body>
