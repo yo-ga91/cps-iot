@@ -36,7 +36,7 @@ Press button START for speech input.
 <br></br>
 
 <button id="buttonLeft" onClick="left()" style="height: 162px; width: 162px; font-size:35px;">GO</button>
-<button id="buttonCenter" onClick="center()" style="height: 162px; width: 162px; font-size:35px;">STOP</button>
+<button id="buttonCenter" onClick="stop()" style="height: 162px; width: 162px; font-size:35px;">STOP</button>
 <button id="buttonRight" onClick="right()" style="height: 162px; width: 162px; font-size:35px;">BACK</button>    
 
 <br></br>
@@ -158,21 +158,21 @@ var final_trs;
         // *********************************************************************    
         if(interim_transcript == "stop" || interim_transcript == " stop" || interim_transcript == "break" || interim_transcript == " break" || interim_transcript == "house" || interim_transcript == "how's" || interim_transcript == " how's" || interim_transcript == " house" || interim_transcript == "Red Sox" || interim_transcript == " Red Sox"|| interim_transcript == " Red Sox")
         {
-            socket.emit("center", 1);
+            socket.emit("stop", 0); // socket.emit("center", 1);
         };
         // *********************************************************************
         // Go
         // *********************************************************************
         if(interim_transcript == "go" || interim_transcript == " go" || interim_transcript == "forward" || interim_transcript == " forward" || interim_transcript == "start" || interim_transcript == " start") // ker napravimo premor med govorom moramo upoštevati tudi presledek+1, t.j. " 1"
         {
-            socket.emit("left", 1);
+            socket.emit("left", {"AIN1": 0, "AIN2": 1});  //socket.emit("left", 1);
         };
         // *********************************************************************
         // Back
         // *********************************************************************
         if(interim_transcript == "back" || interim_transcript == " back" || interim_transcript == "beck" || interim_transcript == " beck" || interim_transcript == "Beck" || interim_transcript == " Beck") // ker napravimo premor med govorom moramo upoštevati tudi presledek+1, t.j. " 1"
         {
-            socket.emit("right", 1);
+            socket.emit("right", {"AIN1": 1, "AIN2": 0}); // socket.emit("right", 1);
         };
 
   }; // End of recognition.on.result
@@ -207,6 +207,31 @@ function startButton(event) {
 // *****************************************************************************
 // Speech API code END
 // *****************************************************************************    
+    
+    function left () 
+    {
+    socket.emit("left", {"AIN1": 0, "AIN2": 1});
+    }
+
+function right () 
+    {
+    socket.emit("right", {"AIN1": 1, "AIN2": 0});
+    }
+
+function stop () 
+    {
+    socket.emit("stop", 0);
+    }
+    
+    
+/*
+function sendPosition () {
+    positionValue = document.getElementById("position").value;
+    stopControlAlgorithm(); // stop just in case
+    switchAlgorihtm();
+    socket.emit("sendPosition", positionValue);
+}
+*/
     
 </script>
 </body>
