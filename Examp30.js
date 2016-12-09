@@ -131,11 +131,11 @@ io.sockets.on("connection", function(socket)
     
     
     
-    
-     socket.on("sendPosition", function(position){
-    readAnalogPin0Flag = 0; // to stop reading from pin 0
-    desiredValue = position; // now the desired value from the GUI takes control
-    socket.emit("messageToClient", "Position set to: position.")
+/*    
+    socket.on("sendPosition", function(position){
+        readAnalogPin0Flag = 0; // to stop reading from pin 0
+        desiredValue = position; // now the desired value from the GUI takes control
+        socket.emit("messageToClient", "Position set to: position.")
 	 
 	      socket.on("stopControlAlgorithm", function(){
 	          stopControlAlgorithm();
@@ -231,4 +231,6 @@ io.sockets.on("connection", function(socket)
     
     
     
+*/
 
+});
